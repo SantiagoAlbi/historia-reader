@@ -1,0 +1,24 @@
+# terraform/modules/cicd/buildspec/plan.yml
+
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - wget -q https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip
+      - unzip -q terraform_${TF_VERSION}_linux_amd64.zip
+      - mv terraform /usr/local/bin/
+
+  build:
+    commands:
+      - cd terraform
+      - terraform init
+      - terraform fmt -check
+      - terraform validate
+      - terraform plan -out=tfplan
+
+artifacts:
+  files:
+    - terraform/tfplan
+    - terraform/**/*
+    - lambdas/**/*

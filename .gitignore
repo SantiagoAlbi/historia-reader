@@ -1,0 +1,7 @@
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.backup
+terraform/modules/cdn/keys/private_key.pem
+terraform/modules/cicd/buildspec/*.zip
+terraform/modules/*/files/
+.terraform.lock.hcl
