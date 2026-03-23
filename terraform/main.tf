@@ -68,9 +68,7 @@ module "observability" {
 module "cicd" {
   source = "./modules/cicd"
 
-  project_name          = var.project_name
-  environment           = var.environment
-  github_connection_arn = var.github_connection_arn
-  github_repo           = var.github_repo
-  github_branch         = var.github_branch
+  project_name = var.project_name
+  environment  = var.environment
+  github_repo  = var.github_repo
 }
