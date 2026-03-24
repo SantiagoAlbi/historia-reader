@@ -12,3 +12,4 @@ terraform/modules/*/files/
 *.log
 *.zip
 *.tfstate
+.env
