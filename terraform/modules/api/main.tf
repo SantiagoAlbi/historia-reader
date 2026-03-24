@@ -79,6 +79,7 @@ resource "aws_iam_role_policy" "lambda_backend" {
 # La Lambda la lee en runtime para firmar las Signed URLs
 resource "aws_secretsmanager_secret" "cloudfront_private_key" {
   name = "${var.project_name}-cf-private-key-${var.environment}"
+  recovery_window_in_days = 0
 }
 
 # Lambda function
