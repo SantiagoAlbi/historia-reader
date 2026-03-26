@@ -20,4 +20,6 @@ terraform/modules/*/files/
 .terraform/
 .terraform.lock.hcl
 terraform.tfvars
+.terraform.tfvars
+.terraform.tfvars.json
 
