@@ -7,8 +7,8 @@ terraform/modules/cicd/buildspec/*.zip
 terraform/modules/*/files/
 .terraform.tfstate
 .terraform.tfstate.backup   
-*.tfvars
-*.tfvars.json
+#*.tfvars
+#*.tfvars.json
 *.log
 *.zip
 .env
@@ -19,7 +19,7 @@ terraform/modules/*/files/
 *.tfstate.backup
 .terraform/
 .terraform.lock.hcl
-terraform.tfvars
-.terraform.tfvars
-.terraform.tfvars.json
+#terraform.tfvars
+#.terraform.tfvars
+#.terraform.tfvars.json
 
