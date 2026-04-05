@@ -124,10 +124,10 @@ resource "aws_apigatewayv2_authorizer" "cognito" {
   identity_sources = ["$request.header.Authorization"]
   name             = "cognito-authorizer"
 
-  jwt_configuration {
-    audience = [aws_apigatewayv2_api.main.id]
-    issuer   = "https://cognito-idp.${var.aws_region}.amazonaws.com/${var.user_pool_id}"
-  }
+jwt_configuration {
+  audience = [var.user_pool_client_id]
+  issuer   = "https://cognito-idp.${var.aws_region}.amazonaws.com/${var.user_pool_id}"
+}
 }
 
 # Stage — el environment del API (dev, prod)

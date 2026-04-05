@@ -49,3 +49,8 @@ variable "cloudfront_key_pair_id" {
   description = "CloudFront public key pair ID for signed URLs"
   type        = string
 }
+
+variable "user_pool_client_id" {
+  description = "Cognito User Pool Client ID for JWT audience validation"
+  type        = string
+}
