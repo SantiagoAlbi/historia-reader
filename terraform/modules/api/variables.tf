@@ -35,7 +35,17 @@ variable "aws_region" {
 variable "books_bucket_id" {
   type = string
 }
-
+/*
 variable "cloudfront_distribution_id" {
   type = string
+}
+*/
+variable "cloudfront_domain" {
+  description = "CloudFront distribution domain name"
+  type        = string
+}
+
+variable "cloudfront_key_pair_id" {
+  description = "CloudFront public key pair ID for signed URLs"
+  type        = string
 }

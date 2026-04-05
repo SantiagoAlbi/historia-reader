@@ -91,17 +91,19 @@ resource "aws_lambda_function" "backend" {
   filename         = data.archive_file.backend.output_path
   source_code_hash = data.archive_file.backend.output_base64sha256
 
-  environment {
-    variables = {
-      BOOKS_TABLE             = var.books_table_name
-      READING_PROGRESS_TABLE  = var.reading_progress_table_name
-      BOOKS_BUCKET            = var.books_bucket_id
-      CLOUDFRONT_DOMAIN       = var.cloudfront_distribution_id
-      PRIVATE_KEY_SECRET_NAME = aws_secretsmanager_secret.cloudfront_private_key.name
-      ENVIRONMENT             = var.environment
-    }
+ environment {
+  variables = {
+    BOOKS_TABLE             = var.books_table_name
+    READING_PROGRESS_TABLE  = var.reading_progress_table_name
+    BOOKS_BUCKET            = var.books_bucket_id
+    CLOUDFRONT_DOMAIN       = var.cloudfront_domain
+    CLOUDFRONT_KEY_PAIR_ID  = var.cloudfront_key_pair_id
+    PRIVATE_KEY_SECRET_NAME = aws_secretsmanager_secret.cloudfront_private_key.name
+    ENVIRONMENT             = var.environment
   }
 }
+    
+  }
 
 # API Gateway HTTP API
 resource "aws_apigatewayv2_api" "main" {

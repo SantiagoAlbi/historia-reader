@@ -51,3 +51,17 @@ resource "aws_cognito_user_pool_client" "main" {
   }
 }
 
+resource "aws_cognito_user" "test_user" {
+  count = var.environment == "dev" ? 1 : 0
+
+  user_pool_id = aws_cognito_user_pool.main.id
+  username     = "santi.albisetti@gmail.com"
+
+  attributes = {
+    email          = "santi.albisetti@gmail.com" #your test email here
+    email_verified = "true"
+  }
+
+  temporary_password   = "Test1234!"
+  message_action       = "SUPPRESS"
+}

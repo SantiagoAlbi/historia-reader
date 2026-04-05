@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Historia Reader</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/amazon-cognito-identity-js@6/dist/amazon-cognito-identity.min.js"></script>
+<style>
+  :root {
+    --bg: #0a0908;
+    --bg2: #131110;
+    --card: #1c1916;
+    --card-hover: #242018;
+    --gold: #c9a84c;
+    --gold-dim: #8a6f2e;
+    --cream: #e8e0d0;
+    --muted: #7a7060;
+    --border: #2a2520;
+    --red: #c0392b;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--cream);
+    font-family: 'Lora', serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── LOGIN ── */
+  #login-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background:
+      radial-gradient(ellipse at 20% 50%, #1a1200 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, #0d0a00 0%, transparent 50%),
+      var(--bg);
+  }
+
+  .login-card {
+    width: 400px;
+    padding: 56px 48px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    position: relative;
+  }
+
+  .login-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+
+  .login-logo {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .login-logo h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 0.05em;
+  }
+
+  .login-logo p {
+    font-size: 0.75rem;
+    color: var(--muted);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-top: 6px;
+  }
+
+  .ornament {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 32px;
+    color: var(--gold-dim);
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+  .ornament::before, .ornament::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .field {
+    margin-bottom: 20px;
+  }
+
+  .field label {
+    display: block;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .field input {
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--cream);
+    font-family: 'Lora', serif;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .field input:focus {
+    border-color: var(--gold-dim);
+  }
+
+  .btn-primary {
+    width: 100%;
+    padding: 14px;
+    background: var(--gold);
+    color: var(--bg);
+    border: none;
+    font-family: 'Playfair Display', serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    margin-top: 8px;
+  }
+
+  .btn-primary:hover { background: #d4b35a; }
+  .btn-primary:active { transform: scale(0.99); }
+  .btn-primary:disabled { background: var(--gold-dim); cursor: not-allowed; }
+
+  .error-msg {
+    background: rgba(192,57,43,0.15);
+    border: 1px solid rgba(192,57,43,0.3);
+    color: #e74c3c;
+    padding: 10px 14px;
+    font-size: 0.85rem;
+    margin-bottom: 16px;
+    display: none;
+  }
+
+  /* New Password Required */
+  #new-password-section { display: none; }
+
+  /* ── APP ── */
+  #app { display: none; }
+
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: linear-gradient(180deg, rgba(10,9,8,0.98) 0%, rgba(10,9,8,0.85) 100%);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+  }
+
+  .nav-brand {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    color: var(--gold);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .nav-user {
+    font-size: 0.8rem;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+
+  .btn-logout {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 6px 16px;
+    font-family: 'Lora', serif;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.05em;
+  }
+  .btn-logout:hover { border-color: var(--gold-dim); color: var(--cream); }
+
+  /* ── CATALOG ── */
+  #catalog {
+    padding: 48px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .catalog-header {
+    margin-bottom: 40px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+
+  .catalog-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    font-weight: 400;
+    color: var(--cream);
+  }
+
+  .catalog-header h2 span {
+    color: var(--gold);
+    font-style: italic;
+  }
+
+  .book-count {
+    font-size: 0.75rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .divider {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, var(--gold-dim), transparent);
+    margin-bottom: 40px;
+    opacity: 0.5;
+  }
+
+  .books-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 24px;
+  }
+
+  .book-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;
+    animation: fadeUp 0.4s ease both;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .book-card:hover {
+    transform: translateY(-6px);
+    border-color: var(--gold-dim);
+    box-shadow: 0 16px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(201,168,76,0.1);
+    background: var(--card-hover);
+  }
+
+  .book-card:nth-child(1) { animation-delay: 0.05s; }
+  .book-card:nth-child(2) { animation-delay: 0.1s; }
+  .book-card:nth-child(3) { animation-delay: 0.15s; }
+  .book-card:nth-child(4) { animation-delay: 0.2s; }
+  .book-card:nth-child(5) { animation-delay: 0.25s; }
+  .book-card:nth-child(6) { animation-delay: 0.3s; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .book-thumb {
+    width: 100%;
+    aspect-ratio: 3/4;
+    background: var(--bg2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .book-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.85;
+  }
+
+  .book-thumb-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 24px;
+    text-align: center;
+    height: 100%;
+    background: linear-gradient(135deg, #1c1810, #0f0d08);
+  }
+
+  .book-thumb-placeholder .icon {
+    font-size: 2.5rem;
+    opacity: 0.4;
+  }
+
+  .book-thumb-placeholder .title-preview {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.85rem;
+    font-style: italic;
+    color: var(--gold-dim);
+    line-height: 1.4;
+  }
+
+  .book-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(10,9,8,0.9) 0%, transparent 50%);
+    opacity: 0;
+    transition: opacity 0.25s;
+    display: flex;
+    align-items: flex-end;
+    padding: 16px;
+  }
+
+  .book-card:hover .book-overlay { opacity: 1; }
+
+  .btn-read {
+    width: 100%;
+    padding: 8px;
+    background: var(--gold);
+    color: var(--bg);
+    border: none;
+    font-family: 'Playfair Display', serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+  }
+
+  .book-info {
+    padding: 16px;
+  }
+
+  .book-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--cream);
+    margin-bottom: 4px;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .book-meta {
+    font-size: 0.75rem;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .book-pages {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .book-status {
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #4a9;
+  }
+
+  /* ── EMPTY / LOADING ── */
+  .state-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 0;
+    gap: 16px;
+    color: var(--muted);
+  }
+
+  .state-container .icon { font-size: 2.5rem; opacity: 0.4; }
+  .state-container p { font-style: italic; font-size: 0.95rem; }
+
+  .spinner {
+    width: 32px;
+    height: 32px;
+    border: 2px solid var(--border);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── READER ── */
+  #reader {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: #050403;
+    flex-direction: column;
+  }
+
+  .reader-nav {
+    height: 52px;
+    background: rgba(10,9,8,0.95);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    gap: 20px;
+    flex-shrink: 0;
+  }
+
+  .btn-back {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 5px 14px;
+    font-family: 'Lora', serif;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-back:hover { border-color: var(--gold-dim); color: var(--cream); }
+
+  .reader-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.95rem;
+    color: var(--cream);
+    font-style: italic;
+  }
+
+  .reader-frame {
+    flex: 1;
+    width: 100%;
+    border: none;
+  }
+
+  .reader-loading {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 16px;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  /* ── TOAST ── */
+  #toast {
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--gold);
+    padding: 14px 20px;
+    font-size: 0.85rem;
+    color: var(--cream);
+    z-index: 999;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s;
+    pointer-events: none;
+    max-width: 320px;
+  }
+  #toast.show { opacity: 1; transform: translateY(0); }
+  #toast.error { border-left-color: var(--red); }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════ LOGIN ═══════════════════════════ -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <h1>Historia</h1>
+      <p>Biblioteca de Historia</p>
+    </div>
+
+    <div class="ornament">Acceso</div>
+
+    <div id="error-msg" class="error-msg"></div>
+
+    <!-- Normal login -->
+    <div id="login-section">
+      <div class="field">
+        <label>Correo electrónico</label>
+        <input type="email" id="username" placeholder="usuario@email.com" autocomplete="username">
+      </div>
+      <div class="field">
+        <label>Contraseña</label>
+        <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <button class="btn-primary" id="btn-login" onclick="login()">Ingresar</button>
+    </div>
+
+    <!-- New password required (first login) -->
+    <div id="new-password-section">
+      <p style="font-size:0.85rem;color:var(--muted);margin-bottom:20px;font-style:italic;">
+        Por ser tu primer ingreso, debés establecer una contraseña nueva.
+      </p>
+      <div class="field">
+        <label>Nueva contraseña</label>
+        <input type="password" id="new-password" placeholder="Mínimo 8 caracteres">
+      </div>
+      <button class="btn-primary" id="btn-new-pass" onclick="confirmNewPassword()">Establecer contraseña</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ APP ═══════════════════════════ -->
+<div id="app">
+  <nav>
+    <div class="nav-brand">Historia</div>
+    <div class="nav-right">
+      <span class="nav-user" id="nav-user"></span>
+      <button class="btn-logout" onclick="logout()">Salir</button>
+    </div>
+  </nav>
+
+  <div id="catalog">
+    <div class="catalog-header">
+      <h2>Tu <span>Biblioteca</span></h2>
+      <span class="book-count" id="book-count"></span>
+    </div>
+    <div class="divider"></div>
+    <div id="books-container">
+      <div class="state-container">
+        <div class="spinner"></div>
+        <p>Cargando biblioteca…</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ READER ═══════════════════════════ -->
+<div id="reader">
+  <div class="reader-nav">
+    <button class="btn-back" onclick="closeReader()">← Volver</button>
+    <span class="reader-title" id="reader-title"></span>
+  </div>
+  <div id="reader-loading" class="reader-loading">
+    <div class="spinner"></div>
+    <span>Preparando lectura…</span>
+  </div>
+  <iframe id="reader-frame" class="reader-frame" style="display:none"></iframe>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────────
+const CONFIG = {
+  userPoolId:  'us-east-1_8xrWoKP3Q',
+  clientId:    '1fclqk8lis2hg2ibapq3u4e7fe',
+  apiUrl:      'https://qgj27lzgn3.execute-api.us-east-1.amazonaws.com',
+};
+
+// ── COGNITO SETUP ────────────────────────────────────────────────
+const userPool = new AmazonCognitoIdentity.CognitoUserPool({
+  UserPoolId: CONFIG.userPoolId,
+  ClientId:   CONFIG.clientId,
+});
+
+let currentUser   = null;
+let cognitoUserObj = null;
+let idToken       = null;
+
+// ── AUTH ──────────────────────────────────────────────────────────
+function login() {
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value;
+
+  if (!username || !password) { showError('Completá todos los campos.'); return; }
+
+  setLoading('btn-login', true);
+  hideError();
+
+  const authDetails = new AmazonCognitoIdentity.AuthenticationDetails({
+    Username: username,
+    Password: password,
+  });
+
+  cognitoUserObj = new AmazonCognitoIdentity.CognitoUser({
+    Username: username,
+    Pool: userPool,
+  });
+
+  cognitoUserObj.authenticateUser(authDetails, {
+    onSuccess(result) {
+      setLoading('btn-login', false);
+      idToken     = result.getIdToken().getJwtToken();
+      currentUser = username;
+      showApp();
+    },
+    onFailure(err) {
+      setLoading('btn-login', false);
+      showError(err.message || 'Error de autenticación.');
+    },
+    newPasswordRequired(userAttributes) {
+      setLoading('btn-login', false);
+      // Show new password form
+      document.getElementById('login-section').style.display = 'none';
+      document.getElementById('new-password-section').style.display = 'block';
+      hideError();
+    },
+  });
+}
+
+function confirmNewPassword() {
+  const newPass = document.getElementById('new-password').value;
+  if (!newPass || newPass.length < 8) {
+    showError('La contraseña debe tener al menos 8 caracteres.');
+    return;
+  }
+
+  setLoading('btn-new-pass', true);
+  hideError();
+
+  cognitoUserObj.completeNewPasswordChallenge(newPass, {}, {
+    onSuccess(result) {
+      setLoading('btn-new-pass', false);
+      idToken     = result.getIdToken().getJwtToken();
+      currentUser = document.getElementById('username').value.trim();
+      showApp();
+    },
+    onFailure(err) {
+      setLoading('btn-new-pass', false);
+      showError(err.message || 'Error al establecer contraseña.');
+    },
+  });
+}
+
+function logout() {
+  if (cognitoUserObj) cognitoUserObj.signOut();
+  idToken = null;
+  currentUser = null;
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('username').value = '';
+  document.getElementById('password').value = '';
+  document.getElementById('login-section').style.display = 'block';
+  document.getElementById('new-password-section').style.display = 'none';
+}
+
+// ── APP ───────────────────────────────────────────────────────────
+function showApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('nav-user').textContent = currentUser;
+  loadBooks();
+}
+
+async function loadBooks() {
+  const container = document.getElementById('books-container');
+  container.innerHTML = `
+    <div class="state-container">
+      <div class="spinner"></div>
+      <p>Cargando biblioteca…</p>
+    </div>`;
+
+  try {
+    const res = await fetch(`${CONFIG.apiUrl}/books`, {
+      headers: { Authorization: idToken },
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    const books = data.books || data.items || data || [];
+
+    document.getElementById('book-count').textContent =
+      books.length === 1 ? '1 libro' : `${books.length} libros`;
+
+    if (books.length === 0) {
+      container.innerHTML = `
+        <div class="state-container">
+          <div class="icon">📚</div>
+          <p>No hay libros en la biblioteca aún.</p>
+        </div>`;
+      return;
+    }
+
+    container.innerHTML = `<div class="books-grid">${books.map(bookCard).join('')}</div>`;
+  } catch (err) {
+    container.innerHTML = `
+      <div class="state-container">
+        <div class="icon">⚠️</div>
+        <p>No se pudo cargar la biblioteca: ${err.message}</p>
+      </div>`;
+    showToast('Error al cargar libros', 'error');
+  }
+}
+
+function bookCard(book) {
+  const title  = book.title  || 'Sin título';
+  const author = book.author || 'Autor desconocido';
+  const pages  = book.num_pages ? `${book.num_pages} pág.` : '';
+  const id     = book.book_id;
+
+  const thumb = book.thumbnail_url
+    ? `<img src="${book.thumbnail_url}" alt="${title}" loading="lazy">`
+    : `<div class="book-thumb-placeholder">
+         <div class="icon">📖</div>
+         <div class="title-preview">${title}</div>
+       </div>`;
+
+  return `
+    <div class="book-card" onclick="openBook('${id}', '${escapeAttr(title)}')">
+      <div class="book-thumb">
+        ${thumb}
+        <div class="book-overlay">
+          <button class="btn-read">Leer</button>
+        </div>
+      </div>
+      <div class="book-info">
+        <div class="book-title" title="${escapeAttr(title)}">${title}</div>
+        <div class="book-meta">
+          <span>${escapeHtml(author)}</span>
+          <span class="book-pages">${pages}</span>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ── READER ────────────────────────────────────────────────────────
+async function openBook(bookId, title) {
+  document.getElementById('reader').style.display = 'flex';
+  document.getElementById('reader-title').textContent = title;
+  document.getElementById('reader-loading').style.display = 'flex';
+  document.getElementById('reader-frame').style.display = 'none';
+
+  try {
+    const res = await fetch(`${CONFIG.apiUrl}/books/${bookId}/read`, {
+      headers: { Authorization: idToken },
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    const url  = data.url || data.signed_url;
+
+    if (!url) throw new Error('No se recibió URL firmada');
+
+    const frame = document.getElementById('reader-frame');
+    frame.src = url;
+    frame.onload = () => {
+      document.getElementById('reader-loading').style.display = 'none';
+      frame.style.display = 'block';
+    };
+  } catch (err) {
+    document.getElementById('reader-loading').innerHTML = `
+      <div style="color:var(--muted);font-style:italic;text-align:center;padding:24px;">
+        ⚠️ No se pudo abrir el libro.<br>
+        <small style="font-size:0.8rem;opacity:0.7;">${err.message}</small>
+      </div>`;
+    showToast('Error al abrir libro', 'error');
+  }
+}
+
+function closeReader() {
+  const frame = document.getElementById('reader-frame');
+  frame.src = '';
+  frame.style.display = 'none';
+  document.getElementById('reader').style.display = 'none';
+}
+
+// ── UTILS ─────────────────────────────────────────────────────────
+function showError(msg) {
+  const el = document.getElementById('error-msg');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+function hideError() {
+  document.getElementById('error-msg').style.display = 'none';
+}
+
+function setLoading(btnId, loading) {
+  const btn = document.getElementById(btnId);
+  btn.disabled = loading;
+  if (btnId === 'btn-login')    btn.textContent = loading ? 'Ingresando…'    : 'Ingresar';
+  if (btnId === 'btn-new-pass') btn.textContent = loading ? 'Guardando…'     : 'Establecer contraseña';
+}
+
+let toastTimer;
+function showToast(msg, type = '') {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.className = 'show' + (type ? ' ' + type : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.className = '', 3500);
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function escapeAttr(s) {
+  return String(s).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+// Enter key support
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    const np = document.getElementById('new-password-section');
+    if (np.style.display === 'block') confirmNewPassword();
+    else login();
+  }
+});
+</script>
+</body>
+</html>
