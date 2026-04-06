@@ -7,6 +7,14 @@ from botocore.signers import CloudFrontSigner
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding
 
+from decimal import Decimal
+
+class DecimalEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, Decimal):
+            return int(obj) if obj % 1 == 0 else float(obj)
+        return super().default(obj)
+
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
@@ -43,7 +51,7 @@ def response(status_code, body):
             "Content-Type": "application/json",
             "Access-Control-Allow-Origin": "*"
         },
-        "body": json.dumps(body)
+        "body": json.dumps(body, cls=DecimalEncoder)
     }
 
 def get_user_id(event):
