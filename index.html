@@ -685,7 +685,8 @@ async function loadBooks() {
 
   try {
     const res = await fetch(`${CONFIG.apiUrl}/books`, {
-      headers: { Authorization: idToken },
+      headers: { Authorization: `Bearer ${idToken}` },
+      //headers: { Authorization: idToken },
     });
 
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -754,8 +755,9 @@ async function openBook(bookId, title) {
   document.getElementById('reader-frame').style.display = 'none';
 
   try {
-    const res = await fetch(`${CONFIG.apiUrl}/books/${bookId}/read`, {
-      headers: { Authorization: idToken },
+    const res = await fetch(`${CONFIG.apiUrl}/books/${bookId}/url`, {
+      headers: { Authorization: `Bearer ${idToken}` },
+      //headers: { Authorization: idToken },
     });
 
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
