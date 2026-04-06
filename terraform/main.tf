@@ -57,8 +57,8 @@ module "api" {
   aws_region                  = var.aws_region
   books_bucket_id             = module.storage.books_bucket_id
   cloudfront_domain           = module.cdn.distribution_domain
-  cloudfront_key_pair_id = module.cdn.public_key_id
-  user_pool_client_id = module.auth.user_pool_client_id 
+  cloudfront_key_pair_id      = module.cdn.public_key_id
+  user_pool_client_id         = module.auth.user_pool_client_id
 }
 
 module "ingestion" {
